@@ -57,8 +57,22 @@
 		#num_10 { -webkit-transform: rotate(300deg); }
 		#num_11 { -webkit-transform: rotate(330deg); }
 		#num_12 { -webkit-transform: rotate(  0deg); }
-		.r { -webkit-transform: rotate(180deg); display: block; }
-		
+		#nums li span {
+			display: block;
+			-webkit-transform-origin: center center;
+		}
+		#num_1  span { -webkit-transform: rotate( -30deg); }
+		#num_2  span { -webkit-transform: rotate( -60deg); }
+		#num_3  span { -webkit-transform: rotate( -90deg); }
+		#num_4  span { -webkit-transform: rotate(-120deg); }
+		#num_5  span { -webkit-transform: rotate(-150deg); }
+		#num_6  span { -webkit-transform: rotate(-180deg); }
+		#num_7  span { -webkit-transform: rotate(-210deg); }
+		#num_8  span { -webkit-transform: rotate(-240deg); }
+		#num_9  span { -webkit-transform: rotate(-270deg); }
+		#num_10 span { -webkit-transform: rotate(-300deg); }
+		#num_11 span { -webkit-transform: rotate(-330deg); }
+		#num_12 span { -webkit-transform: rotate(  -0deg); }
 		
 		@-webkit-keyframes sRotate {
 			from {
@@ -133,18 +147,18 @@
 		<div id="c"></div>
 		
 		<ul id="nums">
-			<li id="num_1">1</li>
-			<li id="num_2">2</li>
-			<li id="num_3">3</li>
-			<li id="num_4"><span class="r">4</span></li>
-			<li id="num_5"><span class="r">5</span></li>
-			<li id="num_6"><span class="r">6</span></li>
-			<li id="num_7"><span class="r">7</span></li>
-			<li id="num_8"><span class="r">8</span></li>
-			<li id="num_9">9</li>
-			<li id="num_10">10</li>
-			<li id="num_11">11</li>
-			<li id="num_12">12</li>
+			<li id="num_1"><span>1</span></li>
+			<li id="num_2"><span>2</span></li>
+			<li id="num_3"><span>3</span></li>
+			<li id="num_4"><span>4</span></li>
+			<li id="num_5"><span>5</span></li>
+			<li id="num_6"><span>6</span></li>
+			<li id="num_7"><span>7</span></li>
+			<li id="num_8"><span>8</span></li>
+			<li id="num_9"><span>9</span></li>
+			<li id="num_10"><span>10</span></li>
+			<li id="num_11"><span>11</span></li>
+			<li id="num_12"><span>12</span></li>
 		</ul>
 		
 		<div id="s" class="outer"><div class="inner"></div></div>
