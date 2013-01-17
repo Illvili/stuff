@@ -8,7 +8,7 @@ stuff
 ---------------
 * **Cube** Webkit 3D CSS3 做的魔方
 * **CSS3** CSS3 的东西
-* * **css3time.html** 时钟
+  * **css3time.html** 时钟
 
 
 ### Cube
