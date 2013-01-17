@@ -1,0 +1,155 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>CSS</title>
+	<style type="text/css" media="screen">
+		* { margin: 0; padding: 0; }
+		#bg {
+			margin: 50px auto;
+			width: 500px;
+			height: 500px;
+			box-shadow: 0 0 10px #555;
+			border-radius: 250px;
+			background-color: #eee;
+			position: relative;
+		}
+		#c {
+			position: absolute;
+			left: 248px;
+			top: 248px;
+			width: 5px;
+			height: 5px;
+			border-radius: 3px;
+			background-color: #eee;
+			box-shadow: 0 0 3px #555;
+			z-index: 100;
+		}
+		#nums {
+			position: absolute;
+			width: 480px;
+			height: 480px;
+			top: 10px;
+			left: 10px;
+			list-style: none;
+			font-size: 30px;
+			font-family: georgia;
+			text-shadow: 0 1px 5px #fff;
+		}
+		#nums li {
+			position: absolute;
+			height: 240px;
+			width: 30px;
+			text-align: center;
+			top: 0;
+			left: 225px;
+			-webkit-transform-origin: center bottom;
+		}
+		#num_1  { -webkit-transform: rotate( 30deg); }
+		#num_2  { -webkit-transform: rotate( 60deg); }
+		#num_3  { -webkit-transform: rotate( 90deg); }
+		#num_4  { -webkit-transform: rotate(120deg); }
+		#num_5  { -webkit-transform: rotate(150deg); }
+		#num_6  { -webkit-transform: rotate(180deg); }
+		#num_7  { -webkit-transform: rotate(210deg); }
+		#num_8  { -webkit-transform: rotate(240deg); }
+		#num_9  { -webkit-transform: rotate(270deg); }
+		#num_10 { -webkit-transform: rotate(300deg); }
+		#num_11 { -webkit-transform: rotate(330deg); }
+		#num_12 { -webkit-transform: rotate(  0deg); }
+		.r { -webkit-transform: rotate(180deg); display: block; }
+		
+		
+		@-webkit-keyframes sRotate {
+			from {
+				-webkit-transform: rotate(180deg);
+			}
+			50% {
+				-webkit-transform: rotate(360deg);
+			}
+			to{
+				-webkit-transform: rotate(540deg);
+			}
+		}
+		
+		.outer {
+			position: absolute;
+			top: 0;
+			left: 0;
+			/*border: 1px solid #f00;*/
+			width: 500px;
+			height: 500px;
+			-webkit-animation-name: sRotate;
+			-webkit-animation-duration: 60s;
+			-webkit-animation-iteration-count: infinite;
+			-webkit-animation-timing-function: linear;
+		}
+		.outer .inner {
+			position: absolute;
+			top: 250px;
+			left: 250px;
+			-webkit-transform-origin: center top;
+		}
+		
+		#s { -webkit-animation-duration: 60s; }
+		#s .inner {
+			background-color: #a10000;
+			box-shadow: -1px -1px 3px #a10000;
+			width: 1px;
+			height: 230px;
+		}
+		
+		#m { -webkit-animation-duration: 3600s; }
+		#m .inner {
+			background-color: #555;
+			box-shadow: -1px -1px 3px #555;
+			width: 3px;
+			height: 180px;
+			left: 249px;
+		}
+		
+		#h { -webkit-animation-duration: 43200s; }
+		#h .inner {
+			background-color: #000;
+			box-shadow: -1px -1px 3px #000;
+			width: 5px;
+			height: 100px;
+			left: 247px;
+		}
+	</style>
+	<script type="text/javascript" charset="utf-8">
+		document.addEventListener('DOMContentLoaded', function () {
+			var d = new Date();
+			var h = d.getHours(), m = d.getMinutes(), s = d.getSeconds();
+			// var h = 17, m = 30, s = 0;
+			document.getElementById('s').children[0].style.webkitTransform = 'rotate(' + (180 + s * 6) + 'deg)';
+			document.getElementById('m').children[0].style.webkitTransform = 'rotate(' + (m * 6 + s / 10) + 'deg)';
+			document.getElementById('h').children[0].style.webkitTransform = 'rotate(' + ((h % 12) * 30 + m / 2 + s / 10) + 'deg)';
+		});
+	</script>
+</head>
+<body>
+	<div id="bg">
+		<div id="c"></div>
+		
+		<ul id="nums">
+			<li id="num_1">1</li>
+			<li id="num_2">2</li>
+			<li id="num_3">3</li>
+			<li id="num_4"><span class="r">4</span></li>
+			<li id="num_5"><span class="r">5</span></li>
+			<li id="num_6"><span class="r">6</span></li>
+			<li id="num_7"><span class="r">7</span></li>
+			<li id="num_8"><span class="r">8</span></li>
+			<li id="num_9">9</li>
+			<li id="num_10">10</li>
+			<li id="num_11">11</li>
+			<li id="num_12">12</li>
+		</ul>
+		
+		<div id="s" class="outer"><div class="inner"></div></div>
+		<div id="m" class="outer"><div class="inner"></div></div>
+		<div id="h" class="outer"><div class="inner"></div></div>
+	</div>
+</body>
+</html>
