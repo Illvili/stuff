@@ -1,0 +1,591 @@
+<!DOCTYPE HTML>
+<html lang="en-us">
+<head>
+	<meta charset="UTF-8">
+	<title>Cube</title>
+</head>
+<body>
+
+<div id="container">
+	<div id="stage">
+		<div id="cube1" class="cube"></div>
+	</div>
+</div>
+
+<div id="infos"></div>
+<div id="controls">
+	<label><input type="range" min="-2000" max="400" id="z_depth" />z depth:<span id="current_z_depth"></span></label>
+	|
+	<buttons id="controlers">
+		<button class="rotate-cube" data-singmaster="F">F</button>
+		<button class="rotate-cube" data-singmaster="F'">F'</button>
+		<button class="rotate-cube" data-singmaster="B">B</button>
+		<button class="rotate-cube" data-singmaster="B'">B'</button>
+		<button class="rotate-cube" data-singmaster="L">L</button>
+		<button class="rotate-cube" data-singmaster="L'">L'</button>
+		<button class="rotate-cube" data-singmaster="R">R</button>
+		<button class="rotate-cube" data-singmaster="R'">R'</button>
+		<button class="rotate-cube" data-singmaster="U">U</button>
+		<button class="rotate-cube" data-singmaster="U'">U'</button>
+		<button class="rotate-cube" data-singmaster="D">D</button>
+		<button class="rotate-cube" data-singmaster="D'">D'</button>
+		|
+		<button id="shuffle">Shuffle</button>
+		<button id="reset">Reset</button>
+	</buttons>
+</div>
+
+<style>
+* { margin: 0; padding: 0; }
+body { background-color: #000; }
+html, body { height: 100%; overflow-y: hidden; }
+
+#infos, #controls {
+	position: fixed;
+	top: 0;
+	right: 0;
+	width: 200px;
+	padding: 10px;
+	color: #0f0;
+	background-color: rgba(255, 255, 255, .2);
+	font-family: Consolas, serif;
+}
+#controls {
+	left: 0;
+	right: 220px;
+	width: auto;
+}
+
+.rotate-cube {
+	width: 20px; height: 20px;
+}
+
+#infos strong {
+	display: inline-block;
+	color: #060;
+	width: 60px;
+	margin-right: .5em;
+	text-align: right;
+}
+
+/* color schemas */
+.color-F { background-color: blue; }
+.color-B { background-color: green; }
+.color-L { background-color: orange; }
+.color-R { background-color: red; }
+.color-U { background-color: yellow; }
+.color-D { background-color: white; }
+
+/* 3D */
+#container {
+	position: relative;
+	height: 100%; width: 100%;
+	border-top: 100px solid #000;
+	box-sizing: border-box;
+	-webkit-perspective: 800;
+	-webkit-perspective-origin: 50% 50%;
+	-webkit-user-select: none;
+}
+#stage {
+	position: absolute; top: 40%; left: 50%; margin: -75px;
+	-webkit-transform-style: preserve-3d;
+}
+.cube {
+	position: absolute;
+	width: 150px; height: 150px;
+	margin: 0 auto;
+	-webkit-transform-style: preserve-3d;
+}
+
+/* face */
+.cube .face {
+	position: absolute;
+	width: 100%; height: 100%;
+	-webkit-transform-style: preserve-3d;
+	-webkit-backface-visibility: hidden;
+}
+.cube .face-F { -webkit-transform: rotateY(   0deg) translateZ(75px); }
+.cube .face-B { -webkit-transform: rotateY(-180deg) translateZ(75px); }
+.cube .face-L { -webkit-transform: rotateY( -90deg) translateZ(75px); }
+.cube .face-R { -webkit-transform: rotateY(-270deg) translateZ(75px); }
+.cube .face-U { -webkit-transform: rotateX(  90deg) translateZ(75px); }
+.cube .face-D { -webkit-transform: rotateX( -90deg) translateZ(75px); }
+
+.cube.cloned .face-F { -webkit-transform: rotateY(   0deg) translateZ(74px); }
+.cube.cloned .face-B { -webkit-transform: rotateY(-180deg) translateZ(74px); }
+.cube.cloned .face-L { -webkit-transform: rotateY( -90deg) translateZ(74px); }
+.cube.cloned .face-R { -webkit-transform: rotateY(-270deg) translateZ(74px); }
+.cube.cloned .face-U { -webkit-transform: rotateX(  90deg) translateZ(74px); }
+.cube.cloned .face-D { -webkit-transform: rotateX( -90deg) translateZ(74px); }
+
+.cube .piece {
+	position: absolute;
+	width: 33.3333333333333333%; height: 33.3333333333333333%;
+	border: 1px solid #000; border-radius: 5px;
+	box-sizing: border-box;
+}
+.cube .row-0 { top: 0; }
+.cube .row-1 { top: 50px; }
+.cube .row-2 { top: 100px; }
+.cube .column-0 { left: 0; }
+.cube .column-1 { left: 50px; }
+.cube .column-2 { left: 100px; }
+
+.cube .face-rotater {
+	position: absolute;
+	opacity: .2;
+}
+.cube .face-rotater:hover { opacity: 1; }
+.cube .face-rotater-0 { left: 37.5px; top: 12.5px; width: 75px; height: 25px; }
+.cube .face-rotater-1 { right: 12.5px; top: 37.5px; width: 25px; height: 75px; }
+.cube .face-rotater-2 { right: 37.5px; bottom: 12.5px; width: 75px; height: 25px; }
+.cube .face-rotater-3 { left: 12.5px; bottom: 37.5px; width: 25px; height: 75px; }
+
+.cube .face-rotater-button {
+	position: absolute;
+	width: 25px; height: 25px; line-height: 25px;
+	text-align: center;
+	cursor: pointer;
+}
+.cube .face-rotater-cw { background-color: #ff0000; }
+.cube .face-rotater-acw { background-color: #00ff00; }
+
+.cube .face-rotater-0 .face-rotater-cw { -webkit-transform: rotate(-90deg); }
+.cube .face-rotater-0 .face-rotater-acw { -webkit-transform: rotate(90deg); right: 0;}
+.cube .face-rotater-1 .face-rotater-acw { -webkit-transform: rotate(180deg); bottom: 0; }
+.cube .face-rotater-2 .face-rotater-cw { -webkit-transform: rotate(90deg); right: 0; }
+.cube .face-rotater-2 .face-rotater-acw { -webkit-transform: rotate(-90deg); }
+.cube .face-rotater-3 .face-rotater-cw { -webkit-transform: rotate(180deg); bottom: 0; }
+
+.cube .animate_wrapper {
+	position: absolute;
+	width: 100%; height: 100%;
+	-webkit-transform-style: preserve-3d;
+}
+
+/* block debug */
+/*.block { display: none; }*/
+/*.block-0, .corner { display: block; }*/
+/* .cube .face { -webkit-backface-visibility: visible; } */
+
+</style>
+<script src="jquery.min.js"></script>
+<script>
+// expand all block element
+var cube_id = '#cube1';
+var cube_cloned_id = cube_id + '_cloned';
+var faces = 'FBLRUD'.split('');
+var F = 0, B = 1, L = 2, R = 3, U = 4, D = 5;
+var face_colors = 'blue,green,orange,red,yellow,white'.split(',');
+var block_size = 50;
+var block_rotate = 90;
+var cube_pieces = 'FFFFFFFFFBBBBBBBBBLLLLLLLLLRRRRRRRRRUUUUUUUUUDDDDDDDDD'.split('');
+
+function get_face(face, row, column) {
+	face = 'string' == typeof face ? faces.indexOf(face) : face;
+	return cube_pieces[face * 9 + row * 3 + column];
+}
+
+function set_face(face, row, column, face_color) {
+	face = 'string' == typeof face ? faces.indexOf(face) : face;
+	return cube_pieces[face * 9 + row * 3 + column] = face_color;
+}
+
+function render() {
+	$(cube_id).find('.piece').each(function () {
+		$(this).add($(cube_cloned_id).find('.piece-' + $(this).data('key'))).css('background-color', face_colors[
+			faces.indexOf(get_face($(this).data('face'), $(this).data('row'), $(this).data('column')))
+		]);
+	});
+}
+
+var cube_face_rotaters = {
+	'F': 'URDL',
+	'B': 'ULDR',
+	'L': 'UFDB',
+	'R': 'UBDF',
+	'U': 'BRFL',
+	'D': 'FRBL'
+};
+$('.cube').each(function () {
+	for (var face_i = 0; face_i < 6; face_i++) {
+		var face = $('<div class="face face-' + faces[face_i] + '" data-face="' + faces[face_i] + '" />');
+		
+		for (var i = 0; i < 3; i++) {
+			for (var j = 0; j < 3; j++) {
+				face.append('<div class="piece piece-' + faces[face_i] + i + j + ' row-' + i + ' column-' + j + '" data-key="' + faces[face_i] + i + j + '" data-face="' + faces[face_i] + '" data-row="' + i + '" data-column="' + j + '" />');
+			}
+		}
+		
+		face.appendTo(this);
+	}
+	
+	$(this).clone().appendTo($(this).parent()).attr('id', cube_cloned_id.substr(1)).addClass('cloned').wrapInner('<div class="animate_wrapper" />').find('.piece').css('display', 'none');
+	
+	var current_cube = this;
+	for (var face_i = 0; face_i < 6; face_i++) {
+		cube_face_rotaters[faces[face_i]].split('').forEach(function (rotater_face, pos_index) {
+			var cw = $('<div class="face-rotater-button face-rotater-cw face-rotater-' + rotater_face + '" data-singmaster="' + rotater_face + '" />').text(rotater_face);
+			var acw = $('<div class="face-rotater-button face-rotater-acw face-rotater-' + rotater_face + '" data-singmaster="' + rotater_face + '\'" />').text(rotater_face + "'");
+			var face_rotater = $('<div class="face-rotater face-rotater-' + pos_index + ' face-rotater-' + rotater_face + '" />').append(cw, acw);
+			
+			$(current_cube).find('.face-' + faces[face_i]).append(face_rotater);
+		});
+	}
+});
+
+function switch_color(face_1, row_1, column_1, face_2, row_2, column_2) {
+	var tmp = get_face(face_1, row_1, column_1);
+	set_face(face_1, row_1, column_1, get_face(face_2, row_2, column_2));
+	set_face(face_2, row_2, column_2, tmp);
+}
+
+function switch_color_4(
+	face_1, row_1, column_1,
+	face_2, row_2, column_2,
+	face_3, row_3, column_3,
+	face_4, row_4, column_4
+) {
+	switch_color(face_1, row_1, column_1, face_2, row_2, column_2);
+	switch_color(face_1, row_1, column_1, face_3, row_3, column_3);
+	switch_color(face_1, row_1, column_1, face_4, row_4, column_4);
+}
+
+function do_rotate_cube(singmaster) {
+	switch (singmaster) {
+		case 'F':
+			switch_color_4(U, 2, 0, R, 0, 0, D, 0, 2, L, 2, 2);
+			switch_color_4(U, 2, 1, R, 1, 0, D, 0, 1, L, 1, 2);
+			switch_color_4(U, 2, 2, R, 2, 0, D, 0, 0, L, 0, 2);
+			switch_color_4(F, 0, 0, F, 0, 2, F, 2, 2, F, 2, 0);
+			switch_color_4(F, 0, 1, F, 1, 2, F, 2, 1, F, 1, 0);
+			
+			break;
+		case "F'":
+			switch_color_4(U, 2, 0, L, 2, 2, D, 0, 2, R, 0, 0);
+			switch_color_4(U, 2, 1, L, 1, 2, D, 0, 1, R, 1, 0);
+			switch_color_4(U, 2, 2, L, 0, 2, D, 0, 0, R, 2, 0);
+			switch_color_4(F, 0, 0, F, 2, 0, F, 2, 2, F, 0, 2);
+			switch_color_4(F, 0, 1, F, 1, 0, F, 2, 1, F, 1, 2);
+			
+			break;
+		case 'B':
+			switch_color_4(U, 0, 2, L, 0, 0, D, 2, 0, R, 2, 2);
+			switch_color_4(U, 0, 1, L, 1, 0, D, 2, 1, R, 1, 2);
+			switch_color_4(U, 0, 0, L, 2, 0, D, 2, 2, R, 0, 2);
+			switch_color_4(B, 0, 0, B, 0, 2, B, 2, 2, B, 2, 0);
+			switch_color_4(B, 0, 1, B, 1, 2, B, 2, 1, B, 1, 0);
+			
+			break;
+		case "B'":
+			switch_color_4(U, 0, 2, R, 2, 2, D, 2, 0, L, 0, 0);
+			switch_color_4(U, 0, 1, R, 1, 2, D, 2, 1, L, 1, 0);
+			switch_color_4(U, 0, 0, R, 0, 2, D, 2, 2, L, 2, 0);
+			switch_color_4(B, 0, 0, B, 2, 0, B, 2, 2, B, 0, 2);
+			switch_color_4(B, 0, 1, B, 1, 0, B, 2, 1, B, 1, 2);
+			
+			break;
+		case 'L':
+			switch_color_4(U, 0, 0, F, 0, 0, D, 0, 0, B, 2, 2);
+			switch_color_4(U, 1, 0, F, 1, 0, D, 1, 0, B, 1, 2);
+			switch_color_4(U, 2, 0, F, 2, 0, D, 2, 0, B, 0, 2);
+			switch_color_4(L, 0, 0, L, 0, 2, L, 2, 2, L, 2, 0);
+			switch_color_4(L, 0, 1, L, 1, 2, L, 2, 1, L, 1, 0);
+			
+			break;
+		case "L'":
+			switch_color_4(U, 0, 0, B, 2, 2, D, 0, 0, F, 0, 0);
+			switch_color_4(U, 1, 0, B, 1, 2, D, 1, 0, F, 1, 0);
+			switch_color_4(U, 2, 0, B, 0, 2, D, 2, 0, F, 2, 0);
+			switch_color_4(L, 0, 0, L, 2, 0, L, 2, 2, L, 0, 2);
+			switch_color_4(L, 0, 1, L, 1, 0, L, 2, 1, L, 1, 2);
+			
+			break;
+		case 'R':
+			switch_color_4(U, 2, 2, B, 0, 0, D, 2, 2, F, 2, 2);
+			switch_color_4(U, 1, 2, B, 1, 0, D, 1, 2, F, 1, 2);
+			switch_color_4(U, 0, 2, B, 2, 0, D, 0, 2, F, 0, 2);
+			switch_color_4(R, 0, 0, R, 0, 2, R, 2, 2, R, 2, 0);
+			switch_color_4(R, 0, 1, R, 1, 2, R, 2, 1, R, 1, 0);
+			
+			break;
+		case "R'":
+			switch_color_4(U, 2, 2, F, 2, 2, D, 2, 2, B, 0, 0);
+			switch_color_4(U, 1, 2, F, 1, 2, D, 1, 2, B, 1, 0);
+			switch_color_4(U, 0, 2, F, 0, 2, D, 0, 2, B, 2, 0);
+			switch_color_4(R, 0, 0, R, 2, 0, R, 2, 2, R, 0, 2);
+			switch_color_4(R, 0, 1, R, 1, 0, R, 2, 1, R, 1, 2);
+			
+			break;
+		case 'U':
+			switch_color_4(B, 0, 2, R, 0, 2, F, 0, 2, L, 0, 2);
+			switch_color_4(B, 0, 1, R, 0, 1, F, 0, 1, L, 0, 1);
+			switch_color_4(B, 0, 0, R, 0, 0, F, 0, 0, L, 0, 0);
+			switch_color_4(U, 0, 0, U, 0, 2, U, 2, 2, U, 2, 0);
+			switch_color_4(U, 0, 1, U, 1, 2, U, 2, 1, U, 1, 0);
+			
+			break;
+		case "U'":
+			switch_color_4(B, 0, 2, L, 0, 2, F, 0, 2, R, 0, 2);
+			switch_color_4(B, 0, 1, L, 0, 1, F, 0, 1, R, 0, 1);
+			switch_color_4(B, 0, 0, L, 0, 0, F, 0, 0, R, 0, 0);
+			switch_color_4(U, 0, 0, U, 2, 0, U, 2, 2, U, 0, 2);
+			switch_color_4(U, 0, 1, U, 1, 0, U, 2, 1, U, 1, 2);
+			
+			break;
+		case 'D':
+			switch_color_4(F, 2, 0, R, 2, 0, B, 2, 0, L, 2, 0);
+			switch_color_4(F, 2, 1, R, 2, 1, B, 2, 1, L, 2, 1);
+			switch_color_4(F, 2, 2, R, 2, 2, B, 2, 2, L, 2, 2);
+			switch_color_4(D, 0, 0, D, 0, 2, D, 2, 2, D, 2, 0);
+			switch_color_4(D, 0, 1, D, 1, 2, D, 2, 1, D, 1, 0);
+			
+			break;
+		case "D'":
+			switch_color_4(F, 2, 0, L, 2, 0, B, 2, 0, R, 2, 0);
+			switch_color_4(F, 2, 1, L, 2, 1, B, 2, 1, R, 2, 1);
+			switch_color_4(F, 2, 2, L, 2, 2, B, 2, 2, R, 2, 2);
+			switch_color_4(D, 0, 0, D, 2, 0, D, 2, 2, D, 0, 2);
+			switch_color_4(D, 0, 1, D, 1, 0, D, 2, 1, D, 1, 2);
+			
+			break;
+	}
+	
+	animate_rotate_cube(singmaster);
+}
+render();
+
+/* face pieces */
+var face_pices = {
+	'F': '.piece-U20, .piece-R00, .piece-D02, .piece-L22, .piece-U21, .piece-R10, .piece-D01, .piece-L12, .piece-U22, .piece-R20, .piece-D00, .piece-L02, .piece-F00, .piece-F02, .piece-F22, .piece-F20, .piece-F01, .piece-F12, .piece-F21, .piece-F10, .piece-F11',
+	'B': '.piece-U02, .piece-L00, .piece-D20, .piece-R22, .piece-U01, .piece-L10, .piece-D21, .piece-R12, .piece-U00, .piece-L20, .piece-D22, .piece-R02, .piece-B00, .piece-B02, .piece-B22, .piece-B20, .piece-B01, .piece-B12, .piece-B21, .piece-B10, .piece-B11',
+	'L': '.piece-U00, .piece-F00, .piece-D00, .piece-B22, .piece-U10, .piece-F10, .piece-D10, .piece-B12, .piece-U20, .piece-F20, .piece-D20, .piece-B02, .piece-L00, .piece-L02, .piece-L22, .piece-L20, .piece-L01, .piece-L12, .piece-L21, .piece-L10, .piece-L11',
+	'R': '.piece-U22, .piece-B00, .piece-D22, .piece-F22, .piece-U12, .piece-B10, .piece-D12, .piece-F12, .piece-U02, .piece-B20, .piece-D02, .piece-F02, .piece-R00, .piece-R02, .piece-R22, .piece-R20, .piece-R01, .piece-R12, .piece-R21, .piece-R10, .piece-R11',
+	'U': '.piece-B02, .piece-R02, .piece-F02, .piece-L02, .piece-B01, .piece-R01, .piece-F01, .piece-L01, .piece-B00, .piece-R00, .piece-F00, .piece-L00, .piece-U00, .piece-U02, .piece-U22, .piece-U20, .piece-U01, .piece-U12, .piece-U21, .piece-U10, .piece-U11',
+	'D': '.piece-F20, .piece-R20, .piece-B20, .piece-L20, .piece-F21, .piece-R21, .piece-B21, .piece-L21, .piece-F22, .piece-R22, .piece-B22, .piece-L22, .piece-D00, .piece-D02, .piece-D22, .piece-D20, .piece-D01, .piece-D12, .piece-D21, .piece-D10, .piece-D11'
+};
+
+var rotate_settings = {
+	'F': ['Z', 0, 90],
+	'B': ['Z', 0, -90],
+	'L': ['X', 0, -90],
+	'R': ['X', 0, 90],
+	'U': ['Y', 0, -90],
+	'D': ['Y', 0, 90],
+	
+	"F'": ['Z', 0, -90],
+	"B'": ['Z', 0, 90],
+	"L'": ['X', 0, 90],
+	"R'": ['X', 0, -90],
+	"U'": ['Y', 0, 90],
+	"D'": ['Y', 0, -90]
+};
+
+var wraf_run = false;
+var wraf_id = null;
+var wraf_start_time = null;
+var wraf_duration = 300;
+var wraf_axis = null;
+var wraf_from = null;
+var wraf_to = null;
+var wraf_element = null;
+var wraf_end_call_back = null;
+var wraf_final_call_back = null;
+
+function animate_rotate_cube(singmaster) {
+	if (wraf_id) return;
+	
+	wraf_axis = rotate_settings[singmaster][0];
+	wraf_from = rotate_settings[singmaster][1];
+	wraf_to = rotate_settings[singmaster][2];
+	
+	$(cube_id).find(face_pices[singmaster[0]]).css('display', 'none');
+	$(cube_cloned_id).find(face_pices[singmaster[0]]).css('display', 'block');
+	
+	wraf_element = $(cube_cloned_id).find('.animate_wrapper');
+	wraf_start_time = +new Date;
+	wraf_id = webkitRequestAnimationFrame(do_animate_rotate_cube);
+	
+	wraf_end_call_back = function () {
+		render();
+		$(cube_id).find(face_pices[singmaster[0]]).css('display', 'block');
+		$(cube_cloned_id).find(face_pices[singmaster[0]]).css('display', 'none');
+		
+		if (singmaster_queen.length) {
+			do_rotate_cube(singmaster_queen.shift());
+		} else {
+			wraf_run = false;
+			wraf_final_call_back && wraf_final_call_back();
+			wraf_final_call_back = null;
+		}
+	};
+}
+
+function do_animate_rotate_cube(time) {
+	var time_pass = time - wraf_start_time;
+	
+	if (wraf_duration > time_pass) {
+		wraf_element.css(
+			'-webkit-transform',
+			'rotate' + wraf_axis + '(' + (time_pass / wraf_duration) * (wraf_to - wraf_from) + 'deg)'
+		);
+		
+		wraf_id = webkitRequestAnimationFrame(do_animate_rotate_cube);
+	} else {
+		webkitCancelRequestAnimationFrame(wraf_id);
+		
+		wraf_id  = null;
+		wraf_start_time = null;
+		
+		wraf_element.css(
+			'-webkit-transform',
+			'rotate' + wraf_axis + '(' + wraf_to + 'deg)'
+		);
+		
+		wraf_end_call_back();
+	}
+}
+
+var singmaster_queen = [];
+function rotate_cube(singmaster) {
+	singmaster_queen.push(singmaster);
+	
+	if (!wraf_run) {
+		wraf_run = true;
+		do_rotate_cube(singmaster_queen.shift());
+	}
+}
+
+function set_all_controlers_disabled(disabled) {
+	$('#controlers > button').attr('disabled', disabled);
+	$('.face-rotater-button').css('display', disabled ? 'none' : 'block')
+}
+
+$('.rotate-cube').click(function () {
+	set_all_controlers_disabled(true);
+	wraf_final_call_back = function () {
+		set_all_controlers_disabled(false);
+	};
+	rotate_cube($(this).data('singmaster'));
+});
+
+$('.face-rotater-button').click(function () {
+	set_all_controlers_disabled(true);
+	wraf_final_call_back = function () {
+		set_all_controlers_disabled(false);
+	};
+	rotate_cube($(this).data('singmaster'));
+});
+
+var shuffle_result = [];
+$('#shuffle').click(function () {
+	set_all_controlers_disabled(true);
+	cube_pieces = 'FFFFFFFFFBBBBBBBBBLLLLLLLLLRRRRRRRRRUUUUUUUUUDDDDDDDDD'.split('');
+	shuffle_result = [];
+	render();
+	
+	var tmp = wraf_duration;
+	wraf_duration = 200;
+	wraf_final_call_back = function () {
+		set_all_controlers_disabled(false);
+		wraf_duration = tmp;
+		console.log('ALL DONE');
+	};
+	
+	var times = Math.floor(Math.random() * 31) + 20;
+	for (var i = 0; i  < times; i++) {
+		var singmaster = faces[Math.floor(Math.random() * 6)];
+		shuffle_result.push(singmaster);
+		rotate_cube(singmaster);
+	}
+	console.log(shuffle_result.join(''));
+});
+
+$('#reset').click(function () {
+	cube_pieces = 'FFFFFFFFFBBBBBBBBBLLLLLLLLLRRRRRRRRRUUUUUUUUUDDDDDDDDD'.split('');
+	shuffle_result = [];
+	render();
+});
+
+var container = $('#container');
+var stage = $('#stage');
+var shape = $(cube_id).add(cube_cloned_id);
+var ox = 0;
+var oy = 0;
+var os = false;
+var brx = 0;
+var bry = 0;
+var factor = 2;
+
+$('html').mousedown(function (event) {
+	if (0 == event.button) {
+		$('body').css('cursor', 'move');
+		os = true;
+		ox = event.pageX;
+		oy = event.pageY;
+		bry = shape.data('rotateX') | 0;
+		brx = shape.data('rotateY') | 0;
+	}
+}).mouseup(function (event) {
+	if (0 == event.button) {
+		$('body').css('cursor', 'default');
+		os = false;
+		ox = 0
+		oy = 0;
+	}
+}).mousemove(function (event) {
+	if (!os) return;
+	
+	var dx = event.pageX - ox;
+	var dy = event.pageY - oy;
+	var rx = brx + dx / factor;
+	var ry = bry - dy / factor;
+	
+	shape.data('rotateX', ry);
+	shape.data('rotateY', rx);
+	
+	refresh3D(shape);
+	
+	$('#infos').html([
+		'<strong>pageX</strong>', event.pageX, '<br />',
+		'<strong>pageY</strong>', event.pageY, '<br />',
+		'<strong>deltaX</strong>', dx, '<br />',
+		'<strong>deltaY</strong>', dy, '<br />',
+		'<strong>rotateX</strong>', ry, 'deg<br />',
+		'<strong>rotateY</strong>', rx, 'deg<br />'
+	].join(''));
+	
+	return false;
+}).bind('mousewheel', function (event) {
+	var tz = parseInt(stage.data('translateZ')) || 0;
+	tz += event.wheelDelta / 10;
+	stage.data('translateZ', tz);
+	
+	$('#z_depth').val(tz);
+	$('#current_z_depth').text(tz + 'px');
+	
+	
+	refresh3D(stage);
+});
+
+function refresh3D(el) {
+	el = $(el);
+	var rx = parseInt(el.data('rotateX')) || 0;
+	var ry = parseInt(el.data('rotateY')) || 0;
+	var tz = parseInt(el.data('translateZ')) || 0;
+	
+	el.css(
+		'-webkit-transform',
+		'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) translateZ(' + tz + 'px)'
+	);
+}
+
+$('#z_depth').change(function () {
+	stage.data('translateZ', this.value);
+	$('#current_z_depth').text(this.value + 'px');
+	
+	refresh3D(stage);
+});
+</script>
+</body>
+</html>
